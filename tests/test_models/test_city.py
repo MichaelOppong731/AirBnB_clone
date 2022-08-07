@@ -1,23 +1,20 @@
 #!/usr/bin/python3
-"""This file defines tests cases for the class City"""
-import unittest
-import pycodestyle
+''' module for city tests '''
+from unittest import TestCase
+import json
+import re
+from uuid import UUID, uuid4
+from datetime import datetime
+from time import sleep
+
+from models.base_model import BaseModel
+from models.city import City
 
 
-class Test_City(unittest.TestCase):
-    """
-    Tests for class City
-    """
-
-    # Test for Documentation
-
-    def test_pep8_base(self):
-        """
-        Test that checks PEP8 | Pycodestyle
-        """
-        syntax = pycodestyle.StyleGuide(quit=True)
-        check = syntax.check_files(['models/city.py'])
-        self.assertEqual(
-            check.total_errors, 0,
-            "Found code style error (and warnings)"
-        )
+class TestCity(TestCase):
+    ''' tests City class '''
+    def test_9(self):
+        ''' task 9 tests '''
+        self.assertTrue(issubclass(City, BaseModel))
+        self.assertEqual(City.state_id, '')
+        self.assertEqual(City.name, '')

@@ -1,54 +1,64 @@
 #!/usr/bin/python3
 """
-Class BaseModel for AirBnB clone, this class will be used by any other class
+A module that implements the BaseModel class
 """
+
 from uuid import uuid4
 from datetime import datetime
-import models
 
 
-class BaseModel():
+class BaseModel:
     """
-    Class BaseModel to State, City, etc
+    A class that defines all common attributes/methods for other classes
     """
 
     def __init__(self, *args, **kwargs):
         """
-        Constructor of Base Model
+        Initialize the BaseModel class
         """
-        if not (kwargs):
+
+        from models import storage
+        if not kwargs:
             self.id = str(uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = self.created_at
-            models.storage.new(self)
+            self.created_at = self.updated_at = datetime.now()
+            storage.new(self)
         else:
-            # Consider user crafted JSONs
-            del kwargs["__class__"]
-            kwargs["created_at"] = datetime.fromisoformat(kwargs["created_at"])
-            kwargs["updated_at"] = datetime.fromisoformat(kwargs["updated_at"])
-            self.__dict__.update(**kwargs)
+            for key, value in kwargs.items():
+                if key != '__class__':
+                    if key in ('created_at', 'updated_at'):
+                        setattr(self, key, datetime.fromisoformat(value))
+                    else:
+                        setattr(self, key, value)
 
     def __str__(self):
         """
-        Unofficial representation of Base Model
+        Returns the string representation of BaseModel object.
+        [<class name>] (<self.id>) <self.__dict__>
         """
-        return (f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}")
+        return "[{}] ({}) {}".format(type(self).__name__, self.id,
+                                     self.__dict__)
 
     def save(self):
         """
-        Save the new changes with the actual time
+        Updates 'self.updated_at' with the current datetime
         """
+        from models import storage
         self.updated_at = datetime.now()
-        models.storage.new(self)
-        models.storage.save()
+        storage.save()
 
     def to_dict(self):
         """
-        Representation in a dictionary of the instance
+        returns a dictionary containing all keys/values of __dict__
+        of the instance:
+        - only instance attributes set will be returned
+        - a key __class__ is added with the class name of the object
+        - created_at and updated_at must be converted to string object in ISO
+        object
         """
-        model = dict(self.__dict__)
-
-        model["__class__"] = self.__class__.__name__
-        model["created_at"] = model["created_at"].isoformat()
-        model["updated_at"] = model["updated_at"].isoformat()
-        return (model)
+        dict_1 = self.__dict__.copy()
+        dict_1["__class__"] = self.__class__.__name__
+        for k, v in self.__dict__.items():
+            if k in ("created_at", "updated_at"):
+                v = self.__dict__[k].isoformat()
+                dict_1[k] = v
+        return dict_1

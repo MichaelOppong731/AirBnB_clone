@@ -1,12 +1,8 @@
 #!/usr/bin/python3
-"""
-Class State for AirBnB clone
-"""
-from models.base_model import BaseModel
+''' module for State class '''
+from .base_model import BaseModel
 
 
 class State(BaseModel):
-    """
-    Class State that inherits from BaseModel
-    """
-    name: str = ""
+    ''' a State class '''
+    name = ''

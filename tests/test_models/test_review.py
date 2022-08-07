@@ -1,23 +1,21 @@
 #!/usr/bin/python3
-"""This file defines tests cases for the class Review"""
-import unittest
-import pycodestyle
+''' module for review tests '''
+from unittest import TestCase
+import json
+import re
+from uuid import UUID, uuid4
+from datetime import datetime
+from time import sleep
+
+from models.base_model import BaseModel
+from models.review import Review
 
 
-class Test_Review(unittest.TestCase):
-    """
-    Tests for class Review
-    """
-
-    # Test for Documentation
-
-    def test_pep8_base(self):
-        """
-        Test that checks PEP8 | Pycodestyle
-        """
-        syntax = pycodestyle.StyleGuide(quit=True)
-        check = syntax.check_files(['models/review.py'])
-        self.assertEqual(
-            check.total_errors, 0,
-            "Found code style error (and warnings)"
-        )
+class TestCity(TestCase):
+    ''' tests Review class '''
+    def test_9(self):
+        ''' task 9 tests '''
+        self.assertTrue(issubclass(Review, BaseModel))
+        self.assertEqual(Review.place_id, '')
+        self.assertEqual(Review.user_id, '')
+        self.assertEqual(Review.text, '')

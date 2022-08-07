@@ -1,14 +1,10 @@
 #!/usr/bin/python3
-"""
-Class Review for AirBnB clone
-"""
-from models.base_model import BaseModel
+''' module for Review class '''
+from .base_model import BaseModel
 
 
 class Review(BaseModel):
-    """
-    Class Review that inherits from BaseModel
-    """
-    place_id: str = ""
-    user_id: str = ""
-    text: str = ""
+    ''' a Review class '''
+    place_id = ''
+    user_id = ''
+    text = ''

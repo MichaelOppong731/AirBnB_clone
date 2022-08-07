@@ -1,47 +1,57 @@
 #!/usr/bin/python3
 """
-Manage the File Storage for the class Base Model
+Contains the FileStorage class model
 """
 import json
-from os.path import exists
-import models
+
+from models.base_model import BaseModel
+from models.user import User
+from models.state import State
+from models.amenity import Amenity
+from models.city import City
+from models.place import Place
+from models.review import Review
 
 
-class FileStorage():
+class FileStorage:
     """
-    Class FileStorage for manage the instance created by BaseModel
+    serializes instances to a JSON file and
+    deserializes JSON file to instances
     """
+
     __file_path = "file.json"
     __objects = {}
 
     def all(self):
-        """Return all the objects in the JSON file"""
-        return (FileStorage.__objects)
+        """
+        Returns the dictionary __objects
+        """
+        return self.__objects
 
     def new(self, obj):
         """
-        Adds a new instance in the obj __objects (to convert into JSON)
-        Args:
-            - obj: Instance of Base Model
+        sets in __objects the `obj` with key <obj class name>.id
         """
-        obj_name = obj.__class__.__name__
-        FileStorage.__objects.update({f"{obj_name}.{obj.id}": obj})
+        self.__objects["{}.{}".format(obj.__class__.__name__, obj.id)] = obj
 
     def save(self):
-        """Writes the obj FileStorage.__objects into a JSON file"""
-        save_dict = {k: v.to_dict() for k, v in FileStorage.__objects.items()}
-        with open(FileStorage.__file_path, 'w+', encoding='utf-8') as file:
-            file.write(json.dumps(save_dict, indent=4, sort_keys=True))
+        """
+        Serialize __objects to the JSON file
+        """
+        with open(self.__file_path, mode="w") as f:
+            dict_storage = {}
+            for k, v in self.__objects.items():
+                dict_storage[k] = v.to_dict()
+            json.dump(dict_storage, f)
 
     def reload(self):
-        """Loads the data of a JSON file into the program"""
-        path = FileStorage.__file_path
-        if (exists(path)):
-            with open(path, 'r', encoding="utf-8") as file:
-                text = file.read()
-                if (len(text)):
-                    objects = json.loads(text)
-                    items = objects.items()
-                    classes = models.classes
-                    load = {k: classes[v['__class__']](**v) for k, v in items}
-                    FileStorage.__objects.update(**load)
+        """
+        Deserializes the JSON file to __objects
+        -> Only IF it exists!
+        """
+        try:
+            with open(self.__file_path, encoding="utf-8") as f:
+                for obj in json.load(f).values():
+                    self.new(eval(obj["__class__"])(**obj))
+        except FileNotFoundError:
+            return

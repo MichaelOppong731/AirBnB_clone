@@ -1,23 +1,22 @@
 #!/usr/bin/python3
-"""This file defines tests cases for the class User"""
-import unittest
-import pycodestyle
+''' module for user tests '''
+from unittest import TestCase
+import json
+import re
+from uuid import UUID, uuid4
+from datetime import datetime
+from time import sleep
+
+from models.base_model import BaseModel
+from models.user import User
 
 
-class Test_User(unittest.TestCase):
-    """
-    Tests for class User
-    """
-
-    # Test for Documentation
-
-    def test_pep8_base(self):
-        """
-        Test that checks PEP8 | Pycodestyle
-        """
-        syntax = pycodestyle.StyleGuide(quit=True)
-        check = syntax.check_files(['models/user.py'])
-        self.assertEqual(
-            check.total_errors, 0,
-            "Found code style error (and warnings)"
-        )
+class TestUser(TestCase):
+    ''' tests User class '''
+    def test_8(self):
+        ''' task 8 tests '''
+        self.assertTrue(issubclass(User, BaseModel))
+        self.assertEqual(User.email, '')
+        self.assertEqual(User.password, '')
+        self.assertEqual(User.first_name, '')
+        self.assertEqual(User.last_name, '')

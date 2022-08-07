@@ -1,23 +1,28 @@
 #!/usr/bin/python3
-from models.engine.file_storage import FileStorage
-from models.base_model import BaseModel
-from models.user import User
-from models.amenity import Amenity
-from models.city import City
-from models.place import Place
-from models.review import Review
-from models.state import State
-
-
-classes = {
-    "BaseModel": BaseModel,
-    "User": User,
-    "City": City,
-    "Place": Place,
-    "Review": Review,
-    "State": State,
-    "Amenity": Amenity
-}
+''' creates a static FileStorage instance '''
+from .engine.file_storage import FileStorage
 
 storage = FileStorage()
+# storage._FileStorage__file_path = 'data.json'
+# storage._FileStorage__objects = {}
+models = {}
+
+
+def import_models():
+    '''import modules after instantiating a storage instace
+    to fix circular imports'''
+    global models
+    from .base_model import BaseModel
+    from .amenity import Amenity
+    from .city import City
+    from .place import Place
+    from .review import Review
+    from .state import State
+    from .user import User
+
+    models = {c.__name__: c
+              for c in [BaseModel, Amenity, City, Place, Review, State, User]}
+
+
+import_models()
 storage.reload()
