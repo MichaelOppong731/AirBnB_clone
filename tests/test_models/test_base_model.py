@@ -1,104 +1,97 @@
 #!/usr/bin/python3
-''' module for base_model tests '''
-from unittest import TestCase
-import json
-import re
-from uuid import UUID, uuid4
+"""This model defines several tests cases for the BaseModel class"""
+import unittest
+import pycodestyle
+from models import BaseModel, storage
 from datetime import datetime
-from time import sleep
-from models.base_model import BaseModel
 
 
-class TestBaseModel(TestCase):
-    ''' tests BaseModel class '''
-    def test_3(self):
-        ''' task 0 tests '''
-        obj = BaseModel()
+class Test_Base_Model(unittest.TestCase):
+    """
+    Tests for BaseModel class
+    """
 
-        # id format and uniqueness
-        self.assertTrue(type(getattr(obj, 'id', None) is str) and
-                        UUID(obj.id))
-        self.assertNotEqual(BaseModel().id, obj.id)
-        self.assertNotEqual(BaseModel().id, BaseModel().id)
-        self.assertNotEqual(BaseModel().id, BaseModel().id)
+    # Test for Documentation
 
-        # created_at and updated_at types
-        self.assertTrue(type(obj.created_at) is datetime)
-        self.assertTrue(type(obj.updated_at) is datetime)
+    def test_pep8_base(self):
+        """
+        Test that checks PEP8 | Pycodestyle
+        """
+        syntax = pycodestyle.StyleGuide(quit=True)
+        check = syntax.check_files(['models/base_model.py'])
+        self.assertEqual(
+            check.total_errors, 0,
+            "Found code style error (and warnings)"
+        )
 
-        # string representation
-        self.assertEqual(str(obj), '[{}] ({}) {}'.format(
-            'BaseModel', obj.id, obj.__dict__))
+    # Test of Base Model
+    def test_created_at(self):
+        """Tests 'created_at' time"""
+        new_model = BaseModel()
+        now = datetime.now().microsecond
+        then = new_model.created_at.microsecond
+        self.assertLess(now - then, 50)
 
-        # time updates
-        old_ctm = obj.created_at
-        old_utm = obj.updated_at
-        sleep(0.01)
-        obj.save()
-        self.assertEqual(old_ctm, obj.created_at)
-        self.assertNotEqual(old_utm, obj.updated_at)
+    def test_update(self):
+        """Tests 'update_at' time"""
+        new_model = BaseModel()
+        then = new_model.created_at.microsecond
+        new_model.save()
+        now = new_model.update_at.microsecond
+        self.assertGreater(now, then)
 
-        old_ctm = obj.created_at
-        old_utm = obj.updated_at
-        sleep(0.01)
-        obj.save()
-        self.assertEqual(old_ctm, obj.created_at)
-        self.assertNotEqual(old_utm, obj.updated_at)
+    def test_id(self):
+        """Tests 'id' values """
+        new_model = BaseModel()
+        new_model2 = BaseModel()
+        self.assertNotEqual(new_model.id, new_model2.id)
 
-        self.assertEqual(obj.to_dict(),
-                         {'__class__': 'BaseModel', 'id': obj.id,
-                          'created_at': obj.created_at.isoformat(),
-                          'updated_at': obj.updated_at.isoformat()})
+    def test_str(self):
+        """"Tests __str__ magic method"""
+        new_model = BaseModel()
+        str_repr = str(new_model)
+        self.assertIn(new_model.__class__.__name__, str_repr)
+        self.assertIn(new_model.id, str_repr)
+        self.assertIn(str(new_model.__dict__), str_repr)
 
-    def test_4(self):
-        ''' task 4 tests '''
-        # args ignorance
-        obj = BaseModel(1, 2, 3, 'kk')
-        self.assertTrue(type(getattr(obj, 'id', None) is str) and
-                        UUID(obj.id))
+    def test_dict(self):
+        """Tests to 'to_dict' method"""
+        new_model = BaseModel()
+        to_dict = new_model.to_dict()
+        for i in to_dict:
+            self.assertIsInstance(i, str)
+        raised = False
+        try:
+            datetime.fromisoformat(to_dict["created_at"])
+            datetime.fromisoformat(to_dict["update_at"])
+        except ValueError as e:
+            raised = True
+        self.assertFalse(raised)
 
-        now = datetime.utcnow()
-        obj_dict = {'id': str(uuid4()), 'created_at': now.isoformat(),
-                    'updated_at': now.isoformat(), '__class__': 'BaseModel'}
-        # kwargs parsing
-        obj = BaseModel(**obj_dict)
-        self.assertEqual(obj.id, obj_dict['id'])
-        # datetime parsing
-        self.assertEqual(obj.created_at, now)
-        self.assertEqual(obj.updated_at, now)
-        # __class__ should not be added as an attribute
-        self.assertFalse('__class__' in obj.__dict__)
+    def test_init_kwargs(self):
+        """Tests '__init__' method with kwargs"""
+        new_model = BaseModel()
+        my_model_json = new_model.to_dict()
+        new_model2 = BaseModel(**my_model_json)
+        self.assertEqual(new_model.to_dict(), new_model2.to_dict())
 
-        # same objects creation
-        self.assertEqual(obj.to_dict(), BaseModel(**obj_dict).to_dict())
-        self.assertEqual(str(obj), str(BaseModel(**obj_dict)))
+    def test_init_args(self):
+        """Tests '__init__' method trying args"""
+        new_model = BaseModel(5, "05/12/99", "05/12/99")
+        self.assertNotEqual(new_model, None)
 
-        # no __class__ dependency
-        del obj_dict['__class__']
-        BaseModel(**obj_dict)  # no execption raised
+    # def test_init_bad_kwargs(self):
+    #     """Tests '__init__' method with a bad id"""
+    #     new_model = BaseModel(id=51)
+    #     to_dict = new_model.to_dict()
+    #     new_model_2 = BaseModel(to_dict)
+    #     self.assertEqual(new_model.to_dict(), new_model_2.to_dict())
 
-        ##
-        ##
-        ##
-        # normal creation in kwargs absence
-        obj = BaseModel()
-        self.assertTrue(type(getattr(obj, 'id', None) is str) and
-                        UUID(obj.id))
-        self.assertNotEqual(BaseModel().id, obj.id)
-        self.assertNotEqual(BaseModel().id, BaseModel().id)
-        self.assertNotEqual(BaseModel().id, BaseModel().id)
+    # Test of FileStorage
 
-        # time updates
-        old_ctm = obj.created_at
-        old_utm = obj.updated_at
-        sleep(0.01)
-        obj.save()
-        self.assertEqual(old_ctm, obj.created_at)
-        self.assertNotEqual(old_utm, obj.updated_at)
-
-        old_ctm = obj.created_at
-        old_utm = obj.updated_at
-        sleep(0.01)
-        obj.save()
-        self.assertEqual(old_ctm, obj.created_at)
-        self.assertNotEqual(old_utm, obj.updated_at)
+    def test_function_all(self):
+        """Test functions 'all, new, save & reload'"""
+        new_model = BaseModel()
+        obj_name = new_model.__class__.__name__
+        id = new_model.id
+        self.assertNotEqual(None, storage.all().get(f"{obj_name}.{id}", None))

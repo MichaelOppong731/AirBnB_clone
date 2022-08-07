@@ -1,19 +1,23 @@
 #!/usr/bin/python3
-''' module for amenity tests '''
-from unittest import TestCase
-import json
-import re
-from uuid import UUID, uuid4
-from datetime import datetime
-from time import sleep
-
-from models.base_model import BaseModel
-from models.amenity import Amenity
+"""This file defines tests cases for the class Amenity"""
+import unittest
+import pycodestyle
 
 
-class TestAmenity(TestCase):
-    ''' tests Amenity class '''
-    def test_9(self):
-        ''' task 9 tests '''
-        self.assertTrue(issubclass(Amenity, BaseModel))
-        self.assertEqual(Amenity.name, '')
+class Test_Amenity(unittest.TestCase):
+    """
+    Tests for class Amenity
+    """
+
+    # Test for Documentation
+
+    def test_pep8_base(self):
+        """
+        Test that checks PEP8 | Pycodestyle
+        """
+        syntax = pycodestyle.StyleGuide(quit=True)
+        check = syntax.check_files(['models/amenity.py'])
+        self.assertEqual(
+            check.total_errors, 0,
+            "Found code style error (and warnings)"
+        )
